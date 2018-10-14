@@ -26,8 +26,8 @@ public class Evaluador {
 
                     if (pe > pp) {
                         pila.apilar(letra);
-                    } else {
-
+                    } else {     
+                        
                         posfija += pila.desapilar();
                         pila.apilar(letra);
                     }
