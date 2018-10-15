@@ -1,142 +1,168 @@
 package evaluadorexpresiones;
 
+import java.util.ArrayList;
+
 public class Evaluador {
 
     public static double evaluar(String infija) {
 
-        String posfija = convertir(infija);
-        System.out.println("La expresión posfija es: " + posfija);
+        ArrayList<String> posfija = convertir(infija);
+//        System.out.println("La expresión posfija es: " + posfija);
         return evaluarPosfija(posfija);
     }
 
-    private static String convertir(String infija) {
+    private static ArrayList<String> convertir(String infija) {
+        ArrayList<String> posfija = new ArrayList<String>();
+        String letra = "";
 
-        String posfija = "";
         Pila pila = new Pila(100);
+        ArrayList<String> list = new ArrayList();
+
         for (int i = 0; i < infija.length(); i++) {
-            char letra = infija.charAt(i);
+            String letraUnic = "" + infija.charAt(i);
+            if (letraUnic.hashCode() >= 48 && letraUnic.hashCode() <= 57) {
+
+                letra += letraUnic;
+
+            } else if (esOperador(letraUnic)) {
+                list.add(letra);
+                list.add(letraUnic);
+                letra = "";
+            }
+        }
+
+        list.add(letra);
+
+//        System.out.println(list.toString());
+        for (int i = 0; i < list.size(); i++) {
+            letra = list.get(i);
+
             if (esOperador(letra)) {
 
                 if (pila.estaVacia()) {
+
                     pila.apilar(letra);
                 } else {
 
                     int pe = prioridadEnExpresion(letra);
-                    int pp = prioridadEnPila((char) pila.elementoTope());
+                    int pp = prioridadEnPila((String) pila.elementoTope());
 
                     if (pe > pp) {
-                        pila.apilar(letra);
-                        
-                    } else {
-                        if (letra == ')') {
 
-                            while ((char) pila.elementoTope() != '(') {
-                                posfija += pila.desapilar();
+                        pila.apilar(letra);
+
+                    } else {
+                        if (letra.equals(")")) {
+
+                            while (!pila.elementoTope().equals("(")) {
+                                posfija.add((String) pila.desapilar());
                             }
                             pila.desapilar();
 
                         } else {
-                            posfija += pila.desapilar();
+                            posfija.add((String) pila.desapilar());
                             pila.apilar(letra);
                         }
                     }
                 }
-
             } else {
-                posfija += letra;
+                posfija.add(letra);
 
             }
         }
 
         while (!pila.estaVacia()) {
-            posfija += pila.desapilar();
+            posfija.add((String) pila.desapilar());
         }
         return posfija;
     }
 
-    private static double evaluarPosfija(String posfija) {
+    private static double evaluarPosfija(ArrayList<String> posfija) {
 
         Pila pila = new Pila(100);
 
-        for (int i = 0; i < posfija.length(); i++) {
-            char letra = posfija.charAt(i);
+        for (int i = 0; i < posfija.size(); i++) {
 
-            if (!esOperador(letra)) {
-                double num = new Double(letra + "");
-                pila.apilar(num);
+            if (!posfija.get(i).equals("")) {
+                String letra = "" + posfija.get(i);
+                if (!esOperador(letra)) {
+                    double num = new Double(letra + "");
+                    pila.apilar(num);
 
-            } else {
-                //operacion importante para autonamata no determinista lamdana
-                double num2 = (double) pila.desapilar();
-                double num1 = (double) pila.desapilar();
-                double num3 = operacion(letra, num1, num2);
+                } else {
 
-                pila.apilar(num3);
+                    double num2 = (double) pila.desapilar();
+                    double num1 = (double) pila.desapilar();
+                    double num3 = operacion(letra, num1, num2);
+
+                    pila.apilar(num3);
+                }
             }
+
         }
 
         return (double) pila.elementoTope();
     }
 
-    private static boolean esOperador(char letra) {
+    private static boolean esOperador(String letra) {
 
-        if (letra == '*' || letra == '/' || letra == '+'
-                || letra == '-' || letra == '(' || letra == ')' || letra == '^') {
+        if (letra.equals("*") || letra.equals("/") || letra.equals("+")
+                || letra.equals("-") || letra.equals("(") || letra.equals(")") || letra.equals("^")) {
             return true;
         } else {
             return false;
         }
     }
 
-    private static int prioridadEnExpresion(char operador) {
+    private static int prioridadEnExpresion(String operador) {
 
-        if (operador == '^') {
+        if (operador.equals("^")) {
             return 4;
         }
-        if (operador == '*' || operador == '/') {
+        if (operador.equals("*") || operador.equals("/")) {
             return 2;
         }
-        if (operador == '+' || operador == '-') {
+        if (operador.equals("+") || operador.equals("-")) {
             return 1;
         }
-        if (operador == '(') {
+        if (operador.equals("(")) {
             return 5;
         }
         return 0;
     }
 
-    private static int prioridadEnPila(char operador) {
+    private static int prioridadEnPila(String operador) {
 
-        if (operador == '^') {
+        if (operador.equals("^")) {
             return 3;
         }
-        if (operador == '*' || operador == '/') {
+        if (operador.equals("*") || operador.equals("/")) {
             return 2;
         }
-        if (operador == '+' || operador == '-') {
+        if (operador.equals("+") || operador.equals("-")) {
             return 1;
         }
-        if (operador == '(') {
+        if (operador.equals("(")) {
             return 0;
         }
         return 0;
     }
 
-    private static double operacion(char letra, double num1, double num2) {
+    private static double operacion(String letra, double num1, double num2) {
 
-        if (letra == '*') {
+        if (letra.equals("*")) {
             return num1 * num2;
         }
-        if (letra == '/') {
+        if (letra.equals("/")) {
             return num1 / num2;
         }
-        if (letra == '+') {
+        if (letra.equals("+")) {
             return num1 + num2;
         }
-        if (letra == '-') {
+        if (letra.equals("-")) {
             return num1 - num2;
         }
-        if (letra == '^') {
+        if (letra.equals("^")) {
             return Math.pow(num1, num2);
         }
 
