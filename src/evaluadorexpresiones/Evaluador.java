@@ -5,7 +5,7 @@ public class Evaluador {
     public static double evaluar(String infija) {
 
         String posfija = convertir(infija);
-        System.out.println("La expresión posfija es: "+posfija);
+        System.out.println("La expresión posfija es: " + posfija);
         return evaluarPosfija(posfija);
     }
 
@@ -26,10 +26,19 @@ public class Evaluador {
 
                     if (pe > pp) {
                         pila.apilar(letra);
-                    } else {     
                         
-                        posfija += pila.desapilar();
-                        pila.apilar(letra);
+                    } else {
+                        if (letra == ')') {
+
+                            while ((char) pila.elementoTope() != '(') {
+                                posfija += pila.desapilar();
+                            }
+                            pila.desapilar();
+
+                        } else {
+                            posfija += pila.desapilar();
+                            pila.apilar(letra);
+                        }
                     }
                 }
 
@@ -46,29 +55,27 @@ public class Evaluador {
     }
 
     private static double evaluarPosfija(String posfija) {
-       
-        Pila pila=new Pila(100);
-        
+
+        Pila pila = new Pila(100);
+
         for (int i = 0; i < posfija.length(); i++) {
-            char letra= posfija.charAt(i);
-            
-            if(!esOperador(letra)){
-                double num= new Double(letra+"");
+            char letra = posfija.charAt(i);
+
+            if (!esOperador(letra)) {
+                double num = new Double(letra + "");
                 pila.apilar(num);
-                
-            }else{
-            //operacion importante para autonamata no determinista lamdana
-            double num2=(double)pila.desapilar();
-            double num1=(double)pila.desapilar();
-            double num3= operacion(letra, num1, num2);
-            
-            pila.apilar(num3);
+
+            } else {
+                //operacion importante para autonamata no determinista lamdana
+                double num2 = (double) pila.desapilar();
+                double num1 = (double) pila.desapilar();
+                double num3 = operacion(letra, num1, num2);
+
+                pila.apilar(num3);
             }
         }
-        
-        
-        
-        return (double)pila.elementoTope();
+
+        return (double) pila.elementoTope();
     }
 
     private static boolean esOperador(char letra) {
@@ -116,14 +123,24 @@ public class Evaluador {
     }
 
     private static double operacion(char letra, double num1, double num2) {
-       
-        if(letra=='*') return num1*num2;
-        if(letra=='/') return num1/num2;
-        if(letra=='+') return num1+num2;
-        if(letra=='-') return num1-num2;
-        if(letra=='^') return Math.pow(num1, num2);
-                
-       return 0;
-        
+
+        if (letra == '*') {
+            return num1 * num2;
+        }
+        if (letra == '/') {
+            return num1 / num2;
+        }
+        if (letra == '+') {
+            return num1 + num2;
+        }
+        if (letra == '-') {
+            return num1 - num2;
+        }
+        if (letra == '^') {
+            return Math.pow(num1, num2);
+        }
+
+        return 0;
+
     }
 }
